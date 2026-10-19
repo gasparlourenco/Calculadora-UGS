@@ -1,0 +1,2011 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Avaliação Académica · UGS</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bs-primary: #2563eb;
+    --bs-primary-rgb: 37, 99, 235;
+    --bs-body-bg: #f8fafc;
+    --bs-body-color: #1e293b;
+    --bs-secondary-color: #64748b;
+    --bs-border-color: #e2e8f0;
+    --bs-success: #059669;
+    --bs-success-rgb: 5, 150, 105;
+    --bs-warning: #d97706;
+    --bs-warning-rgb: 217, 119, 6;
+    --bs-danger: #dc2626;
+    --bs-danger-rgb: 220, 38, 38;
+    --bs-border-radius: 0.5rem;
+    --bs-border-radius-sm: 0.375rem;
+    --bs-border-radius-lg: 0.75rem;
+  }
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    -webkit-font-smoothing: antialiased;
+  }
+  .tabular-nums { font-variant-numeric: tabular-nums; }
+
+  .btn-primary {
+    --bs-btn-bg: #2563eb;
+    --bs-btn-border-color: #2563eb;
+    --bs-btn-hover-bg: #1d4ed8;
+    --bs-btn-hover-border-color: #1d4ed8;
+    --bs-btn-active-bg: #1e40af;
+    --bs-btn-active-border-color: #1e40af;
+    --bs-btn-disabled-bg: #cbd5e1;
+    --bs-btn-disabled-border-color: #cbd5e1;
+    --bs-btn-disabled-color: #ffffff;
+  }
+  .btn-outline-primary {
+    --bs-btn-color: #2563eb;
+    --bs-btn-border-color: #2563eb;
+    --bs-btn-hover-bg: #2563eb;
+    --bs-btn-hover-border-color: #2563eb;
+  }
+  .btn { font-weight: 500; letter-spacing: -0.01em; }
+  .btn-sm { padding: 0.375rem 0.75rem; }
+
+  .card {
+    border: 1px solid var(--bs-border-color);
+    box-shadow: 0 1px 2px 0 rgb(15 23 42 / 0.04);
+  }
+  .card-header { border-bottom: 1px solid var(--bs-border-color); padding: 0.875rem 1.125rem; }
+  .card-body { padding: 1.25rem; }
+
+  .form-control, .form-select {
+    border-color: #cbd5e1;
+    font-size: 0.875rem;
+  }
+  .form-control:focus, .form-select:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgb(37 99 235 / 0.15);
+  }
+  .form-control.is-invalid:focus {
+    box-shadow: 0 0 0 3px rgb(220 38 38 / 0.15);
+  }
+  .input-group-text { background: #f8fafc; border-color: #cbd5e1; color: #64748b; font-size: 0.8125rem; }
+  .form-label { color: #334155; font-weight: 500; font-size: 0.8125rem; }
+
+  .app-container { max-width: 1040px; }
+
+  /* Navbar */
+  .app-navbar {
+    background: #ffffff;
+    border-bottom: 1px solid var(--bs-border-color);
+    box-shadow: 0 1px 2px 0 rgb(15 23 42 / 0.03);
+  }
+  .app-logo {
+    width: 40px; height: 40px; border-radius: 0.625rem;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 4px rgb(37 99 235 / 0.25);
+    flex-shrink: 0;
+  }
+
+  /* Stats */
+  .stat-card { border: 1px solid var(--bs-border-color); background: #fff; border-radius: 0.625rem; padding: 0.875rem 1rem; }
+  .stat-icon {
+    width: 32px; height: 32px; border-radius: 0.5rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.875rem; flex-shrink: 0;
+  }
+  .stat-icon.primary   { background: #eff6ff; color: #2563eb; }
+  .stat-icon.success   { background: #ecfdf5; color: #059669; }
+  .stat-icon.danger    { background: #fef2f2; color: #dc2626; }
+  .stat-icon.secondary { background: #f1f5f9; color: #475569; }
+
+  /* Phase cards */
+  .phase-card {
+    border: 1px solid var(--bs-border-color);
+    border-left-width: 4px;
+    border-radius: 0.75rem;
+    background: #fff;
+    transition: box-shadow 0.2s, border-color 0.2s;
+    overflow: hidden;
+  }
+  .phase-card.active  { border-left-color: #2563eb; }
+  .phase-card.closed  { border-left-color: #059669; background: #fcfdfd; }
+  .phase-card.ready   { border-left-color: #10b981; box-shadow: 0 1px 3px rgb(16 185 129 / 0.1); }
+
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    padding: 1rem 1.125rem;
+    border-bottom: 1px solid var(--bs-border-color);
+  }
+  .phase-number {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #eff6ff; color: #2563eb;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 0.9375rem;
+    flex-shrink: 0;
+  }
+  .phase-card.closed .phase-number { background: #d1fae5; color: #059669; }
+  .phase-card.ready .phase-number  { background: #d1fae5; color: #059669; }
+  .phase-title { flex: 1; min-width: 0; }
+  .phase-title h6 { margin: 0; font-weight: 600; font-size: 0.9375rem; color: #0f172a; }
+  .phase-title small { color: #64748b; font-size: 0.75rem; }
+
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 0.25rem;
+    padding: 0.25rem 0.5rem; border-radius: 0.375rem;
+    font-size: 0.6875rem; font-weight: 600;
+    white-space: nowrap;
+  }
+  .status-badge.pending  { background: #f1f5f9; color: #64748b; }
+  .status-badge.progress { background: #fef3c7; color: #92400e; }
+  .status-badge.ready    { background: #d1fae5; color: #065f46; }
+  .status-badge.closed   { background: #d1fae5; color: #065f46; }
+
+  code.calc {
+    display: block; padding: 0.625rem 0.875rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-family: 'SFMono-Regular', 'Menlo', 'Consolas', monospace;
+    font-size: 0.78125rem; color: #334155; line-height: 1.65;
+    white-space: pre-wrap; word-break: break-word;
+  }
+
+  .process-row { cursor: pointer; transition: background 0.15s; }
+  .process-row:hover { background: #f8fafc; }
+
+  .autosave-badge {
+    font-size: 0.6875rem; color: #64748b;
+    display: inline-flex; align-items: center; gap: 0.25rem;
+    transition: color 0.2s;
+  }
+  .autosave-badge.saving { color: #2563eb; }
+
+  .ac-input-group .input-group-text { background: #f8fafc; }
+
+  .result-icon {
+    width: 64px; height: 64px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+
+  .field-error {
+    display: none;
+    font-size: 0.75rem;
+    color: #dc2626;
+    margin-top: 0.25rem;
+  }
+  .field-error.show { display: block; }
+
+  .hint-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.8125rem;
+    color: #475569;
+    display: flex; align-items: flex-start; gap: 0.5rem;
+  }
+  .hint-box.warning { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+
+  @media print {
+    .no-print { display: none !important; }
+    body { background: #fff !important; }
+    .card, .phase-card { border: 1px solid #dee2e6 !important; box-shadow: none !important; }
+  }
+
+  /* Refinamento visual: hierarquia, conforto e experiência mobile */
+  :root {
+    --brand-ink: #14233b;
+    --brand-blue: #3157d5;
+    --brand-blue-dark: #2445b8;
+    --surface: #ffffff;
+    --surface-soft: #f4f7fc;
+    --line-soft: #e6ebf3;
+  }
+  body { background: #f4f6fb; color: var(--brand-ink); line-height: 1.55; }
+  .app-navbar {
+    position: sticky; top: 0; z-index: 1020;
+    background: rgba(255,255,255,.94);
+    backdrop-filter: blur(14px);
+    border-bottom-color: #e7ecf4;
+  }
+  .app-logo {
+    width: 44px; height: 44px; border-radius: 14px;
+    background: linear-gradient(145deg, #4169ed, #233fae);
+    box-shadow: 0 7px 18px rgba(49,87,213,.2);
+  }
+  .app-container { max-width: 1120px; }
+  main.app-container { padding-top: clamp(1.25rem, 3vw, 2.25rem) !important; }
+  h4 { font-size: clamp(1.35rem, 3vw, 1.75rem); letter-spacing: -.035em !important; }
+  .card, .phase-card, .stat-card {
+    border-color: var(--line-soft); border-radius: 16px;
+    box-shadow: 0 5px 20px rgba(22, 40, 75, .035);
+  }
+  .card-header { background: #fff; }
+  .card-body { padding: clamp(1rem, 3vw, 1.5rem); }
+  .stat-card { padding: 1rem; min-height: 76px; transition: transform .18s ease, box-shadow .18s ease; }
+  .stat-icon { width: 38px; height: 38px; border-radius: 12px; font-size: 1rem; }
+  .phase-card { border-left-width: 4px; }
+  .phase-header { padding: 1.1rem clamp(.9rem, 3vw, 1.25rem); gap: .75rem; }
+  .phase-number { width: 40px; height: 40px; border-radius: 13px; }
+  .phase-title h6 { font-size: 1rem; letter-spacing: -.015em; }
+  .phase-title small { display: inline-block; margin-top: 3px; line-height: 1.4; }
+  .status-badge { max-width: 100%; white-space: normal; line-height: 1.35; }
+  .btn {
+    min-height: 38px; border-radius: 10px; transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .btn-primary {
+    --bs-btn-bg: #3157d5; --bs-btn-border-color: #3157d5;
+    --bs-btn-hover-bg: #2445b8; --bs-btn-hover-border-color: #2445b8;
+    --bs-btn-active-bg: #1d399d; --bs-btn-active-border-color: #1d399d;
+    box-shadow: 0 3px 8px rgba(49,87,213,.12);
+  }
+  .btn-primary:active { transform: translateY(1px); }
+  .btn-sm { min-height: 34px; }
+  .form-control, .form-select, .input-group-text {
+    min-height: 42px; border-radius: 10px; font-size: .925rem;
+  }
+  .input-group > .form-control, .input-group > .form-select,
+  .input-group > .input-group-text { border-radius: 10px; }
+  .input-group > :not(:first-child) { margin-left: 4px; }
+  .form-label { margin-bottom: .45rem; font-size: .82rem; }
+  .form-control:focus, .form-select:focus {
+    border-color: #6e8af0; box-shadow: 0 0 0 4px rgba(49,87,213,.12);
+  }
+  .hint-box { border-radius: 12px; padding: .85rem 1rem; line-height: 1.5; }
+  code.calc { border-radius: 12px; padding: .85rem 1rem; }
+  .table { --bs-table-hover-bg: #f6f8fd; }
+  .table thead th { padding-top: .9rem; padding-bottom: .9rem; font-size: .75rem; }
+  .table tbody td { padding-top: .9rem; padding-bottom: .9rem; }
+  .process-row { transition: background .15s ease; }
+  .process-row:hover { background: #f7f9fe; }
+  footer { border-color: var(--line-soft) !important; }
+  .modal-content { border-radius: 18px; overflow: hidden; }
+  .toast { backdrop-filter: blur(10px); }
+  :focus-visible { outline: 3px solid rgba(49,87,213,.35); outline-offset: 2px; }
+  @media (min-width: 768px) {
+    .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(22,40,75,.07); }
+  }
+  @media (max-width: 767.98px) {
+    .app-navbar .container { padding-left: 1rem; padding-right: 1rem; }
+    .app-logo { width: 40px; height: 40px; border-radius: 12px; }
+    .app-navbar .fw-bold { font-size: .93rem !important; line-height: 1.25; }
+    .app-navbar .text-uppercase { font-size: .57rem !important; }
+    main.app-container { padding-left: 1rem; padding-right: 1rem; }
+    .stat-card { padding: .8rem; gap: .65rem !important; }
+    .stat-icon { width: 34px; height: 34px; }
+    .stat-card .fw-bold { font-size: 1.15rem !important; }
+    .phase-header { align-items: flex-start; flex-wrap: wrap; }
+    .phase-title { flex: 1 1 calc(100% - 60px); }
+    .phase-header .status-badge { margin-left: 52px; }
+    .btn-group { display: flex; width: 100%; }
+    .btn-group > .btn { flex: 1; white-space: normal; }
+    #btn-novo { min-height: 42px; }
+    /* A tabela transforma-se em cartões legíveis em ecrãs pequenos. */
+    .table-responsive { overflow: visible; }
+    .table-responsive table, .table-responsive tbody { display: block; width: 100%; }
+    .table-responsive thead { display: none; }
+    .table-responsive tbody { display: grid; gap: .75rem; padding: .75rem; }
+    .table-responsive tbody tr {
+      display: grid; grid-template-columns: 1fr 1fr; gap: .5rem .75rem;
+      padding: .9rem; border: 1px solid var(--line-soft); border-radius: 14px;
+      background: #fff; box-shadow: 0 3px 12px rgba(22,40,75,.035);
+      cursor: pointer;
+    }
+    .table-responsive tbody td {
+      display: block !important; border: 0; padding: .1rem 0 !important;
+      min-width: 0; text-align: left !important; overflow-wrap: anywhere;
+    }
+    .table-responsive tbody td:first-child { grid-column: 1 / -1; padding-bottom: .55rem !important; border-bottom: 1px solid #eef1f7; }
+    .table-responsive tbody td:nth-child(3) { grid-column: 1 / -1; }
+    .table-responsive tbody td:last-child {
+      position: absolute; /* overridden below by grid placement */
+    }
+    .table-responsive tbody tr { position: relative; }
+    .table-responsive tbody td:last-child {
+      position: static; grid-column: 1 / -1; display: flex !important;
+      justify-content: flex-end; border-top: 1px solid #eef1f7; padding-top: .35rem !important;
+    }
+    .table-responsive tbody td .badge { white-space: normal; text-align: left; line-height: 1.45; }
+    .table-responsive tbody td:nth-child(4)::before,
+    .table-responsive tbody td:nth-child(5)::before,
+    .table-responsive tbody td:nth-child(6)::before {
+      display: block; color: #748198; font-size: .68rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .045em; margin-bottom: .12rem;
+    }
+    .table-responsive tbody td:nth-child(4)::before { content: "NF₁"; }
+    .table-responsive tbody td:nth-child(5)::before { content: "NF₂"; }
+    .table-responsive tbody td:nth-child(6)::before { content: "Recurso"; }
+    .table-responsive tbody td:nth-child(4),
+    .table-responsive tbody td:nth-child(5),
+    .table-responsive tbody td:nth-child(6) { display: block !important; }
+    .table-responsive tbody td:nth-child(4).d-none,
+    .table-responsive tbody td:nth-child(5).d-none,
+    .table-responsive tbody td:nth-child(6).d-none { display: block !important; }
+    .table-responsive tbody td:nth-child(2) { display: none !important; }
+    .table-responsive tbody td:nth-child(4) { grid-column: 1; }
+    .table-responsive tbody td:nth-child(5) { grid-column: 2; }
+    .table-responsive tbody td:nth-child(6) { grid-column: 1 / -1; }
+    .table-responsive tbody td:first-child .fw-medium { font-size: .98rem; }
+    .table-responsive tbody td:first-child .text-secondary { margin-top: .2rem; }
+    .table-responsive tbody td:last-child button { min-width: 40px; min-height: 40px; }
+    #filtro-text, #filtro-estado, #btn-clear { min-height: 42px; }
+    .d-flex.justify-content-between.align-items-center.mt-3 { align-items: flex-start !important; }
+    #btn-export, #btn-clear-all { min-height: 36px; }
+    .modal-dialog { margin: .75rem; }
+    .modal-footer { gap: .5rem; }
+    .modal-footer .btn { flex: 1; }
+    .result-icon { width: 56px; height: 56px; }
+  }
+  @media (max-width: 380px) {
+    .app-navbar .text-uppercase { letter-spacing: .035em !important; }
+    .stat-card { padding: .65rem; }
+    .stat-icon { width: 30px; height: 30px; }
+    .phase-header .status-badge { margin-left: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  }
+
+
+  /* Ajustes finais de utilização em telemóveis reais */
+  html { -webkit-text-size-adjust: 100%; }
+  img, svg, canvas, video { max-width: 100%; }
+  .app-container, #view, .card, .card-body { min-width: 0; }
+  .text-break, .form-text, .hint-box { overflow-wrap: anywhere; }
+  @media (max-width: 767.98px) {
+    body { font-size: 15px; }
+    .app-navbar { backdrop-filter: none; }
+    .app-navbar .d-flex.align-items-center.gap-3 { gap: .65rem !important; }
+    .app-navbar .fw-bold { max-width: calc(100vw - 100px); }
+    .btn, .form-select, .form-control { touch-action: manipulation; }
+    /* Evita o zoom automático dos campos no Safari/iOS. */
+    input.form-control, select.form-select, textarea.form-control { font-size: 16px; }
+    .modal { padding: 0 !important; }
+    .modal-dialog { width: auto; max-width: none; margin: .5rem; }
+    .modal-content { max-height: calc(100dvh - 1rem); }
+    .modal-body { overflow-y: auto; overscroll-behavior: contain; }
+    .modal-footer { flex-wrap: wrap; }
+    .modal-footer .btn { min-height: 44px; }
+    .table-responsive tbody { padding: .6rem; }
+    .table-responsive tbody tr { padding: .8rem; }
+    .table-responsive tbody td:last-child button,
+    #btn-novo, #btn-clear, #btn-ident-confirm { min-height: 44px; }
+    .d-flex.justify-content-between.align-items-center.mt-3 > div { flex-wrap: wrap; }
+  }
+  @media (max-width: 360px) {
+    main.app-container { padding-left: .75rem; padding-right: .75rem; }
+    .app-navbar .container { padding-left: .75rem; padding-right: .75rem; }
+    .stat-card { gap: .45rem !important; }
+    .stat-card .text-uppercase { font-size: .56rem !important; }
+    .phase-header .status-badge { margin-left: 0; }
+  }
+  /* ═══════════════════════════════════════════════════════════
+   REFINAMENTO MOBILE — correcções focadas
+   (adicionar ao final do <style>, depois das regras existentes)
+   ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 767.98px) {
+
+  /* ─ 1. Mostrar UC/semestre nos cards de processo
+        (estavam ocultos; sem isto não se sabe de que UC é cada linha) */
+  .table-responsive tbody td:nth-child(2) {
+    display: block !important;
+    grid-column: 1 / -1;
+    padding: .15rem 0 .55rem !important;
+    border-bottom: 1px solid #eef1f7;
+    margin-bottom: .15rem;
+  }
+  .table-responsive tbody td:nth-child(2) > div:first-child {
+    font-weight: 500;
+    color: #334155;
+  }
+
+  /* ─ 2. Phase header com grid: número à esquerda, título em cima,
+        badge de estado em linha própria alinhado ao título */
+  .phase-header {
+    display: grid !important;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    column-gap: .75rem;
+    row-gap: .4rem;
+    flex-wrap: unset;
+  }
+  .phase-header .phase-number {
+    grid-column: 1;
+    grid-row: 1 / 3;
+    align-self: start;
+  }
+  .phase-header .phase-title {
+    grid-column: 2;
+    grid-row: 1;
+    flex: unset;
+    min-width: 0;
+  }
+  .phase-header .status-badge {
+    grid-column: 2;
+    grid-row: 2;
+    margin-left: 0 !important;
+    justify-self: start;
+    white-space: normal;
+    text-align: left;
+    max-width: 100%;
+  }
+
+  /* ─ 3. Botão "Fechar Fase" + hint: empilhar em coluna,
+        botão em baixo com largura total */
+  .phase-card .card-body > .d-flex.justify-content-between.align-items-center.flex-wrap {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+  .phase-card .card-body > .d-flex.justify-content-between.align-items-center.flex-wrap > .small {
+    text-align: left;
+    margin-bottom: .5rem;
+  }
+  .phase-card .card-body > .d-flex.justify-content-between.align-items-center.flex-wrap > .btn {
+    width: 100%;
+  }
+
+  /* ─ 4. Header da ficha de edição (título + acções):
+        empilhar acções por baixo, alinhadas à direita */
+  #view > div > .d-flex.justify-content-between.align-items-start.mb-4 {
+    flex-direction: column;
+    align-items: stretch !important;
+    gap: .75rem !important;
+  }
+  #view > div > .d-flex.justify-content-between.align-items-start.mb-4 > div:last-child {
+    justify-content: flex-end;
+  }
+
+  /* ─ 5. Esconder o símbolo decorativo do campo de pesquisa */
+  .search-field kbd { display: none; }
+}
+
+@media (max-width: 575.98px) {
+
+  /* ─ 6. Hero mais compacta em phones */
+  .dashboard-hero { padding: 1.1rem 1rem !important; }
+  .dashboard-hero h1 { font-size: 1.3rem !important; }
+  .dashboard-hero p  { font-size: .8rem !important; }
+  .hero-actions .btn { font-size: .78rem !important; min-height: 40px; }
+
+  /* ─ 7. Recent items com avatar ligeiramente maior */
+  .recent-avatar { flex: 0 0 38px; width: 38px; height: 38px; }
+  .recent-item   { padding: .85rem; }
+
+  /* ─ 8. Resultado final: forçar botões full-width */
+  #print-area .no-print.d-flex.flex-sm-row > .btn {
+    width: 100%;
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 380px) {
+
+  /* ─ 9. Input group das ACs em ecrãs muito estreitos */
+  .ac-input-group .input-group-text {
+    padding: .3rem .35rem;
+    font-size: .72rem;
+  }
+  .ac-input-group .input-group-text:first-of-type {
+    min-width: 42px;
+  }
+  .ac-input-group .btn-outline-danger {
+    padding: .25rem .35rem;
+  }
+
+  /* ─ 10. Brand e logo mais compactos */
+  .app-navbar .brand-title { max-width: 140px; font-size: .76rem; }
+  .app-logo { width: 32px; height: 32px; }
+}
+
+  /* Painel académico: hierarquia visual, acções claras e resumo de progresso */
+  .dashboard-nav { min-height: 76px; }
+  .brand-title { font-size: 1rem; color: #0f172a; letter-spacing: -.025em; }
+  .brand-subtitle { font-size: .61rem; letter-spacing: .105em; }
+  .dashboard-page { max-width: 1080px; margin: 0 auto; }
+  .dashboard-hero { display:flex; justify-content:space-between; align-items:center; gap:1.5rem; padding:1.65rem 1.75rem; border-radius:1rem; color:#fff; background:linear-gradient(115deg,#12264a 0%,#1d4380 62%,#2563eb 100%); box-shadow:0 12px 30px rgb(30 64 175 / .12); position:relative; overflow:hidden; }
+  .dashboard-hero::after { content:""; position:absolute; width:260px; height:260px; border:1px solid rgb(255 255 255 / .1); border-radius:50%; right:13%; top:-155px; box-shadow:0 0 0 28px rgb(255 255 255 / .025),0 0 0 58px rgb(255 255 255 / .025); pointer-events:none; }
+  .hero-copy,.hero-actions { position:relative; z-index:1; }
+  .eyebrow { display:flex; align-items:center; gap:.5rem; font-size:.64rem; font-weight:700; letter-spacing:.14em; color:#bfdbfe; margin-bottom:.65rem; }
+  .eyebrow-dot { width:7px; height:7px; border-radius:50%; background:#60a5fa; box-shadow:0 0 0 4px rgb(96 165 250 / .16); }
+  .dashboard-hero h1 { font-size:clamp(1.45rem,3vw,2rem); line-height:1.15; letter-spacing:-.04em; font-weight:750; margin:0 0 .55rem; }
+  .dashboard-hero p { color:#dbeafe; margin:0; max-width:520px; font-size:.88rem; line-height:1.6; }
+  .hero-actions { display:flex; flex-direction:column; gap:.55rem; flex-shrink:0; }
+  .hero-actions .btn { min-height:42px; white-space:nowrap; }
+  .btn-hero-secondary { background:rgb(255 255 255 / .09); border:1px solid rgb(255 255 255 / .22); color:#fff; }
+  .btn-hero-secondary:hover { background:rgb(255 255 255 / .16); border-color:rgb(255 255 255 / .35); color:#fff; }
+  .dashboard-search { background:#fff; border:1px solid #dbe4f0; border-radius:1rem; padding:1.2rem; box-shadow:0 5px 18px rgb(15 23 42 / .035); }
+  .search-heading,.section-heading { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-bottom:1rem; }
+  .search-heading h2,.section-heading h2 { font-size:1rem; font-weight:700; letter-spacing:-.025em; margin:0 0 .25rem; color:#172b4d; }
+  .search-heading p,.section-heading p { color:#718096; font-size:.78rem; margin:0; }
+  .search-count { font-size:.72rem; font-weight:600; color:#64748b; background:#f1f5f9; padding:.35rem .65rem; border-radius:999px; white-space:nowrap; }
+  .search-controls { display:grid; grid-template-columns:minmax(0,1fr) 210px auto; gap:.65rem; align-items:center; }
+  .search-field { display:flex; align-items:center; gap:.7rem; min-width:0; height:48px; border:1.5px solid #cbd8e8; background:#fbfdff; border-radius:.7rem; padding:0 .85rem; transition:border-color .15s,box-shadow .15s,background .15s; }
+  .search-field:focus-within { border-color:#3b82f6; background:#fff; box-shadow:0 0 0 4px rgb(59 130 246 / .12); }
+  .search-field>i { color:#2563eb; font-size:1.05rem; }
+  .search-field input { border:0; outline:0; box-shadow:none; background:transparent; color:#1e293b; font-size:.88rem; width:100%; min-width:0; }
+  .search-field input::placeholder { color:#94a3b8; }
+  .search-field kbd { color:#94a3b8; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:.3rem; font-size:.75rem; padding:.08rem .35rem; }
+  .search-controls .form-select,.search-controls .btn { height:48px; }
+  .section-heading { margin-bottom:.85rem; }
+  .updated-label { font-size:.7rem; color:#64748b; white-space:nowrap; }
+  .dashboard-stats .stat-card { min-height:88px; border-radius:.8rem; padding:1rem; gap:.85rem !important; box-shadow:0 2px 7px rgb(15 23 42 / .025); }
+  .dashboard-stats .stat-icon { width:38px; height:38px; border-radius:.7rem; font-size:1rem; }
+  .dashboard-stats .text-uppercase { font-size:.62rem !important; letter-spacing:.075em !important; }
+  .dashboard-stats .fw-bold { font-size:1.5rem !important; margin-top:.2rem; }
+  .progress-overview { background:#fff; border:1px solid #e2e8f0; border-radius:.8rem; padding:1rem 1.1rem; }
+  .progress-copy,.progress-foot { display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+  .progress-copy div { display:flex; flex-direction:column; gap:.2rem; }
+  .progress-copy div strong { font-size:.82rem; color:#24364b; }
+  .progress-copy div span,.progress-foot { font-size:.72rem; color:#718096; }
+  .progress-percent { color:#2563eb; font-size:1.05rem; font-variant-numeric:tabular-nums; }
+  .progress-track { height:8px; border-radius:99px; overflow:hidden; background:#eaf0f8; margin:.85rem 0 .6rem; }
+  .progress-track span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#2563eb,#60a5fa); transition:width .25s ease; }
+  .process-table-card { overflow:hidden; border-radius:.85rem; }
+  .process-table-card .table thead th { background:#f8fafc; color:#64748b; font-size:.67rem; text-transform:uppercase; letter-spacing:.045em; font-weight:700; border-bottom:1px solid #e2e8f0; padding:.9rem .7rem; white-space:nowrap; }
+  .process-table-card .table tbody td { padding:.9rem .7rem; border-color:#edf2f7; }
+  .process-table-card .table tbody tr { cursor:pointer; }
+  .process-table-card .table tbody tr:hover { background:#f8fbff; }
+  .dashboard-footnote { display:flex; align-items:center; gap:.8rem; flex-wrap:wrap; padding:.85rem .15rem; font-size:.7rem; color:#8290a3; }
+  .dashboard-footnote span:first-child { margin-right:auto; }
+  .empty-filter { border-radius:.85rem; }
+  .empty-filter-icon { display:grid; place-items:center; width:52px; height:52px; margin:0 auto .8rem; border-radius:1rem; background:#eff6ff; color:#2563eb; font-size:1.25rem; }
+  .empty-filter h3 { font-size:1rem; font-weight:700; color:#172b4d; }
+  .empty-filter p { color:#718096; font-size:.8rem; }
+  .recent-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.75rem; }
+  .recent-item { min-width:0; display:flex; align-items:center; gap:.65rem; text-align:left; padding:.85rem; border:1px solid #e2e8f0; border-radius:.8rem; background:#fff; color:inherit; transition:border-color .15s,transform .15s,box-shadow .15s; }
+  .recent-item:hover { border-color:#93c5fd; transform:translateY(-1px); box-shadow:0 6px 16px rgb(15 23 42 / .05); }
+  .recent-avatar { display:grid; place-items:center; flex:0 0 36px; width:36px; height:36px; border-radius:.65rem; color:#2563eb; background:#eff6ff; }
+  .recent-main { min-width:0; display:flex; flex-direction:column; gap:.2rem; flex:1; }
+  .recent-main strong { font-size:.78rem; color:#24364b; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .recent-main small { font-size:.68rem; color:#8290a3; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .recent-status { font-size:.62rem; color:#64748b; max-width:85px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .recent-arrow { color:#94a3b8; font-size:.8rem; }
+  .dashboard-page .card { box-shadow:0 3px 12px rgb(15 23 42 / .025); }
+  @media (max-width: 767.98px) {
+    .dashboard-nav { min-height:64px; padding-top:.7rem !important; padding-bottom:.7rem !important; }
+    .brand-title { font-size:.84rem; max-width:205px; line-height:1.25; }
+    .brand-subtitle { font-size:.52rem; }
+    .nav-actions { gap:.35rem !important; }
+    .nav-actions .btn { min-height:40px; padding:.45rem .6rem; }
+    .nav-process-link,.nav-export-label { display:none; }
+    .dashboard-hero { align-items:flex-start; flex-direction:column; padding:1.25rem; gap:1.1rem; }
+    .dashboard-hero p { font-size:.82rem; }
+    .hero-actions { flex-direction:row; width:100%; }
+    .hero-actions .btn { flex:1; font-size:.78rem; padding:.65rem .5rem; }
+    .dashboard-search { padding:1rem; }
+    .search-heading { align-items:flex-start; }
+    .search-heading h2,.section-heading h2 { font-size:.94rem; }
+    .search-heading p,.section-heading p { line-height:1.45; max-width:290px; }
+    .search-controls { grid-template-columns:minmax(0,1fr) auto; gap:.55rem; }
+    .search-field { grid-column:1 / -1; height:50px; }
+    .search-controls .form-select { height:44px; font-size:.83rem; }
+    .search-controls .btn { height:44px; }
+    .dashboard-stats .stat-card { min-height:78px; padding:.75rem; gap:.6rem !important; }
+    .dashboard-stats .stat-icon { width:32px; height:32px; font-size:.9rem; }
+    .dashboard-stats .fw-bold { font-size:1.25rem !important; }
+    .updated-label { display:none; }
+    .progress-overview { padding:.9rem; }
+    .recent-grid { grid-template-columns:1fr; }
+    .recent-item { min-height:64px; }
+    .recent-status { max-width:95px; }
+    .dashboard-footnote { align-items:flex-start; flex-direction:column; gap:.4rem; }
+    .dashboard-footnote span:first-child { margin-right:0; }
+    .processes-heading { align-items:flex-start; }
+  }
+  @media (max-width: 390px) {
+    .brand-title { max-width:155px; font-size:.78rem; }
+    .app-logo { width:34px; height:34px; }
+    .nav-actions #nav-btn-novo { font-size:0; width:40px; padding:0; }
+    .nav-actions #nav-btn-novo i { font-size:1rem; margin:0 !important; }
+    .hero-actions { flex-direction:column; }
+  }
+
+</style>
+</head>
+<body>
+
+<nav class="app-navbar no-print">
+  <div class="container app-container">
+    <div class="dashboard-nav d-flex align-items-center justify-content-between gap-3 py-3">
+      <div class="d-flex align-items-center gap-3 min-w-0">
+        <div class="app-logo"><i class="bi bi-mortarboard-fill"></i></div>
+        <div class="min-w-0">
+          <div class="fw-bold brand-title">Sistema de Avaliação Académica</div>
+          <div class="text-secondary text-uppercase brand-subtitle">Universidade Gregório Semedo</div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-2 nav-actions">
+        <a href="#dashboard-processos" class="btn btn-light border btn-sm nav-process-link"><i class="bi bi-grid-1x2 me-1"></i>Processos</a>
+        <button type="button" id="nav-btn-export" class="btn btn-light border btn-sm" title="Exportar processos para CSV"><i class="bi bi-download me-1"></i><span class="nav-export-label">Exportar</span></button>
+        <button type="button" id="nav-btn-novo" class="btn btn-primary btn-sm"><i class="bi bi-plus-lg me-1"></i>Novo processo</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="container app-container py-4">
+  <div id="view"></div>
+</main>
+
+<footer class="border-top bg-white mt-5 no-print">
+  <div class="container app-container py-3">
+    <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 text-secondary" style="font-size: 0.75rem;">
+      <span>Ferramenta académica não oficial · Política de avaliação UGS</span>
+      <span><i class="bi bi-lock me-1"></i>Dados guardados localmente neste dispositivo</span>
+    </div>
+  </div>
+</footer>
+
+<div class="modal fade" id="modal-ident" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border: none; box-shadow: 0 20px 40px rgb(15 23 42 / 0.15);">
+      <div class="modal-header" style="border-bottom: 1px solid #e2e8f0; padding: 1rem 1.25rem;">
+        <h5 class="modal-title fw-semibold" id="modal-ident-title" style="font-size: 1.0625rem;">Novo processo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+      </div>
+      <div class="modal-body" style="padding: 1.25rem;">
+        <div class="mb-3">
+          <label class="form-label">Nome do aluno <span class="text-danger">*</span></label>
+          <input id="ident-aluno" class="form-control" placeholder="Nome completo" maxlength="100" autocomplete="off">
+          <div class="field-error" id="ident-aluno-err">Indica o nome do aluno.</div>
+        </div>
+        <div class="row g-2">
+          <div class="col-12 col-sm-6">
+            <label class="form-label">Nº de estudante</label>
+            <input id="ident-numero" class="form-control" placeholder="Opcional" maxlength="20" autocomplete="off">
+          </div>
+          <div class="col-12 col-sm-6">
+            <label class="form-label">Unidade curricular</label>
+            <input id="ident-uc" class="form-control" placeholder="Opcional" maxlength="80" autocomplete="off">
+          </div>
+          <div class="col-12">
+            <label class="form-label">Semestre / Ano lectivo</label>
+            <input id="ident-semestre" class="form-control" placeholder="Ex: 2024/2025 · 1º semestre" maxlength="40" autocomplete="off">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="border-top: 1px solid #e2e8f0; padding: 0.875rem 1.25rem;">
+        <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" id="btn-ident-confirm" class="btn btn-primary">Criar processo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3 no-print" style="z-index: 1080;">
+  <div id="toast-el" class="toast align-items-center border-0 text-bg-dark" style="border-radius: 0.625rem; box-shadow: 0 10px 25px rgb(15 23 42 / 0.2);">
+    <div class="d-flex">
+      <div class="toast-body d-flex align-items-center gap-2" style="padding: 0.875rem 1rem;">
+        <i id="toast-icon" class="bi bi-check-circle-fill"></i>
+        <span id="toast-msg"></span>
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════════════════════
+   CONSTANTES
+   ═══════════════════════════════════════════════════════════ */
+const LS_KEY = 'ugs:v1:processes';
+const SS_ACTIVE = 'ugs:v1:active-id';
+const MAX_PROCESSES = 500;
+
+/* ═══════════════════════════════════════════════════════════
+   FÓRMULAS
+   ═══════════════════════════════════════════════════════════ */
+const roundHalfUp       = n => Math.floor(n + 0.5);
+const calcNF1           = (mac, cpf) => 0.6 * (4 * mac) + 0.4 * cpf;
+const calcNF2           = (nf1G, ex) => 0.6 * nf1G + 0.4 * ex;
+const isDispensado      = nfG => nfG >= 14;
+const isAprovadoRecurso = nota => roundHalfUp(nota) >= 10;
+const exameNecessario   = nf1G => Math.max(0, (13.5 - 0.6 * nf1G) / 0.4);
+
+/* ═══════════════════════════════════════════════════════════
+   UTILITÁRIOS
+   ═══════════════════════════════════════════════════════════ */
+const $  = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = (n, d = 2) => (n == null || !Number.isFinite(n)) ? '—' : Number(n).toFixed(d).replace('.', ',');
+const uid = () => (crypto.randomUUID && crypto.randomUUID()) || String(Date.now()) + Math.random().toString(36).slice(2, 8);
+const fmtDate = iso => {
+  if (!iso) return '—';
+  try { return new Date(iso).toLocaleString('pt-PT', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }); }
+  catch { return '—'; }
+};
+
+/**
+ * Parse numérico rigoroso.
+ * - Aceita vírgula ou ponto como separador decimal.
+ * - Aceita espaços em volta (trim).
+ * - Rejeita notação científica, hex, vazio, ".", "-".
+ * - Limita a `maxDecimals` casas decimais.
+ * - Devolve número ou null.
+ */
+function parseNum(v, maxDecimals = 2) {
+  if (v == null) return null;
+  const s = String(v).trim().replace(',', '.');
+  if (s === '' || s === '.' || s === '-') return null;
+  if (!/^-?\d*\.?\d*$/.test(s)) return null;
+  const parts = s.split('.');
+  if (parts[1] && parts[1].length > maxDecimals) return null;
+  const n = parseFloat(s);
+  return Number.isFinite(n) ? n : null;
+}
+
+function validateField(value, { min, max, required = true, maxDecimals = 2, label = 'valor' }) {
+  const s = value == null ? '' : String(value).trim();
+  if (s === '') {
+    if (required) return { valid: false, msg: 'Campo obrigatório' };
+    return { valid: true, num: null };
+  }
+  const num = parseNum(s, maxDecimals);
+  if (num === null) return { valid: false, msg: `Valor inválido (máx. ${maxDecimals} casas decimais)` };
+  if (num < min) return { valid: false, msg: `Mínimo: ${fmt(min)}` };
+  if (num > max) return { valid: false, msg: `Máximo: ${fmt(max)}` };
+  return { valid: true, num };
+}
+
+function showToast(msg, kind = 'success') {
+  const el = $('#toast-el');
+  el.className = `toast align-items-center border-0 text-bg-${kind === 'error' ? 'danger' : 'dark'}`;
+  const icon = $('#toast-icon');
+  icon.className = `bi ${kind === 'error' ? 'bi-exclamation-circle-fill' : 'bi-check-circle-fill'}`;
+  $('#toast-msg').textContent = msg;
+  bootstrap.Toast.getOrCreateInstance(el).show();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MODELO
+   ═══════════════════════════════════════════════════════════ */
+function novoProcesso({ aluno, numero, uc, semestre }) {
+  const now = new Date().toISOString();
+  return {
+    id: uid(),
+    aluno: aluno.trim(), numero: (numero || '').trim(),
+    uc: (uc || '').trim(), semestre: (semestre || '').trim(),
+    criadoEm: now, actualizadoEm: now,
+    macMode: 'list',
+    acs: [''],
+    macDirect: '',
+    cpf: '',
+    fase1Fechada: false, nf1: null, nf1G: null, fase1FechadaEm: null,
+    exame: '',
+    fase2Fechada: false, nf2: null, nf2G: null, fase2FechadaEm: null,
+    recurso: '',
+    fase3Fechada: false, fase3FechadaEm: null,
+    resultado: null,
+  };
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PERSISTÊNCIA (com tratamento de quota)
+   ═══════════════════════════════════════════════════════════ */
+function loadAll() {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch {
+    return [];
+  }
+}
+function saveAll(arr) {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(arr.slice(0, MAX_PROCESSES)));
+    return true;
+  } catch (e) {
+    if (e && (e.name === 'QuotaExceededError' || e.code === 22 || e.code === 1014)) {
+      showToast('Espaço de armazenamento esgotado. Apaga processos antigos.', 'error');
+    } else {
+      showToast('Erro ao guardar dados no dispositivo.', 'error');
+    }
+    return false;
+  }
+}
+function getProcess(id) {
+  if (!id) return null;
+  return loadAll().find(p => p.id === id) || null;
+}
+function upsertProcess(p) {
+  const all = loadAll();
+  const idx = all.findIndex(x => x.id === p.id);
+  p.actualizadoEm = new Date().toISOString();
+  if (idx >= 0) all[idx] = p; else all.unshift(p);
+  all.sort((a, b) => (b.actualizadoEm || '').localeCompare(a.actualizadoEm || ''));
+  return saveAll(all);
+}
+function removeProcess(id) {
+  return saveAll(loadAll().filter(p => p.id !== id));
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ESTADO DERIVADO
+   ═══════════════════════════════════════════════════════════ */
+function estadoProcesso(p) {
+  if (p.resultado) return 'FINALIZADO';
+  if (!p.fase1Fechada) return 'EM_FASE_1';
+  if (!p.fase2Fechada) return 'EM_FASE_2';
+  if (!p.fase3Fechada) return 'EM_FASE_3';
+  return 'FINALIZADO';
+}
+function estadoLabel(p) {
+  const e = estadoProcesso(p);
+  if (e === 'FINALIZADO') {
+    return {
+      DISPENSADO_F1:    'Dispensado · 1ª fase',
+      DISPENSADO_F2:    'Dispensado · 2ª fase',
+      APROVADO_RECURSO: 'Aprovado · recurso',
+      REPROVADO:        'Reprovado',
+    }[p.resultado] || 'Finalizado';
+  }
+  return { EM_FASE_1: 'Em curso · Fase 1', EM_FASE_2: 'Em curso · Fase 2', EM_FASE_3: 'Em curso · Fase 3' }[e];
+}
+function estadoBadgeClass(p) {
+  if (estadoProcesso(p) === 'FINALIZADO') {
+    return p.resultado === 'REPROVADO' ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success';
+  }
+  return 'bg-primary-subtle text-primary';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   VALIDAÇÃO / CÁLCULO
+   ═══════════════════════════════════════════════════════════ */
+function getACs(p) {
+  if (p.macMode === 'direct') {
+    const v = parseNum(p.macDirect);
+    return (v != null && v >= 0 && v <= 5) ? [v] : null;
+  }
+  if (!Array.isArray(p.acs) || p.acs.length === 0) return null;
+  const arr = [];
+  for (const v of p.acs) {
+    const n = parseNum(v);
+    if (n == null || n < 0 || n > 5) return null;
+    arr.push(n);
+  }
+  return arr;
+}
+const getMAC = p => { const a = getACs(p); return a ? a.reduce((s, n) => s + n, 0) / a.length : null; };
+
+function validateF1(p) {
+  const issues = [];
+  const mac = getMAC(p);
+  const cpf = parseNum(p.cpf);
+  if (mac == null) {
+    if (p.macMode === 'direct') {
+      if (parseNum(p.macDirect) == null) issues.push('Introduz o MAC');
+    } else {
+      if (!Array.isArray(p.acs) || p.acs.length === 0) issues.push('Introduz pelo menos uma AC');
+      else {
+        const empty = p.acs.findIndex(v => String(v || '').trim() === '');
+        if (empty >= 0) issues.push(`Falta preencher AC ${empty + 1}`);
+        const invalid = p.acs.findIndex(v => parseNum(v) == null || parseNum(v) < 0 || parseNum(v) > 5);
+        if (invalid >= 0 && empty < 0) issues.push(`AC ${invalid + 1} fora de 0–5`);
+      }
+    }
+  }
+  if (cpf == null) issues.push('Introduz o CPF');
+  else if (cpf < 0 || cpf > 20) issues.push('CPF fora de 0–20');
+  return { ok: issues.length === 0, issues };
+}
+function validateF2(p) {
+  const ex = parseNum(p.exame);
+  if (ex == null) return { ok: false, issues: ['Introduz a nota do exame'] };
+  if (ex < 0 || ex > 20) return { ok: false, issues: ['Exame fora de 0–20'] };
+  return { ok: true, issues: [] };
+}
+function validateF3(p) {
+  const r = parseNum(p.recurso);
+  if (r == null) return { ok: false, issues: ['Introduz a nota do recurso'] };
+  if (r < 0 || r > 20) return { ok: false, issues: ['Recurso fora de 0–20'] };
+  return { ok: true, issues: [] };
+}
+
+const podeFecharF1 = p => validateF1(p).ok;
+const podeFecharF2 = p => validateF2(p).ok;
+const podeFecharF3 = p => validateF3(p).ok;
+
+/* Status visual da fase (para o badge do header) */
+function phase1Status(p) {
+  if (p.fase1Fechada) return { cls: 'closed', icon: 'bi-lock-fill', text: `Fechada · NF₁ = ${p.nf1G}` };
+  const v = validateF1(p);
+  if (v.ok) return { cls: 'ready', icon: 'bi-check-circle-fill', text: 'Pronto para fechar' };
+  const hasSomething = (getMAC(p) != null) || parseNum(p.cpf) != null || (p.macMode === 'direct' && p.macDirect);
+  if (!hasSomething) return { cls: 'pending', icon: 'bi-circle', text: 'Por começar' };
+  return { cls: 'progress', icon: 'bi-hourglass-split', text: v.issues[0] };
+}
+function phase2Status(p) {
+  if (p.fase2Fechada) return { cls: 'closed', icon: 'bi-lock-fill', text: `Fechada · NF₂ = ${p.nf2G}` };
+  const v = validateF2(p);
+  if (v.ok) return { cls: 'ready', icon: 'bi-check-circle-fill', text: 'Pronto para fechar' };
+  return { cls: 'progress', icon: 'bi-hourglass-split', text: v.issues[0] };
+}
+function phase3Status(p) {
+  if (p.fase3Fechada) return { cls: 'closed', icon: 'bi-lock-fill', text: 'Fechada' };
+  const v = validateF3(p);
+  if (v.ok) return { cls: 'ready', icon: 'bi-check-circle-fill', text: 'Pronto para fechar' };
+  return { cls: 'progress', icon: 'bi-hourglass-split', text: v.issues[0] };
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ACÇÕES DE FASE
+   ═══════════════════════════════════════════════════════════ */
+function fecharFase1(p) {
+  if (!podeFecharF1(p)) return false;
+  p.nf1 = calcNF1(getMAC(p), parseNum(p.cpf));
+  p.nf1G = roundHalfUp(p.nf1);
+  p.fase1Fechada = true;
+  p.fase1FechadaEm = new Date().toISOString();
+  if (isDispensado(p.nf1G)) p.resultado = 'DISPENSADO_F1';
+  return true;
+}
+function fecharFase2(p) {
+  if (!podeFecharF2(p)) return false;
+  p.nf2 = calcNF2(p.nf1G, parseNum(p.exame));
+  p.nf2G = roundHalfUp(p.nf2);
+  p.fase2Fechada = true;
+  p.fase2FechadaEm = new Date().toISOString();
+  if (isDispensado(p.nf2G)) p.resultado = 'DISPENSADO_F2';
+  return true;
+}
+function fecharFase3(p) {
+  if (!podeFecharF3(p)) return false;
+  p.fase3Fechada = true;
+  p.fase3FechadaEm = new Date().toISOString();
+  p.resultado = isAprovadoRecurso(parseNum(p.recurso)) ? 'APROVADO_RECURSO' : 'REPROVADO';
+  return true;
+}
+function reabrirFase1(p) {
+  const tem = p.fase2Fechada || p.exame !== '' || p.fase3Fechada || p.recurso !== '';
+  if (tem && !confirm('Reabrir a Fase 1 apaga o exame, o recurso e o resultado final. Continuar?')) return false;
+  p.fase1Fechada = false; p.nf1 = null; p.nf1G = null; p.fase1FechadaEm = null;
+  p.exame = ''; p.fase2Fechada = false; p.nf2 = null; p.nf2G = null; p.fase2FechadaEm = null;
+  p.recurso = ''; p.fase3Fechada = false; p.fase3FechadaEm = null;
+  p.resultado = null;
+  return true;
+}
+function reabrirFase2(p) {
+  const tem = p.fase3Fechada || p.recurso !== '';
+  if (tem && !confirm('Reabrir a Fase 2 apaga o recurso e o resultado final. Continuar?')) return false;
+  p.fase2Fechada = false; p.nf2 = null; p.nf2G = null; p.fase2FechadaEm = null;
+  p.recurso = ''; p.fase3Fechada = false; p.fase3FechadaEm = null;
+  p.resultado = null;
+  return true;
+}
+function reabrirFase3(p) {
+  if (!confirm('Reabrir a Fase 3 apaga o resultado final. Continuar?')) return false;
+  p.fase3Fechada = false; p.fase3FechadaEm = null;
+  p.resultado = null;
+  return true;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NAVEGAÇÃO
+   ═══════════════════════════════════════════════════════════ */
+const ui = { view: 'list', activeId: null, filter: '', filterEstado: '' };
+try { ui.activeId = sessionStorage.getItem(SS_ACTIVE) || null; } catch {}
+
+function openProcess(id) {
+  if (!getProcess(id)) { closeProcess(); return; }
+  ui.view = 'edit'; ui.activeId = id;
+  try { sessionStorage.setItem(SS_ACTIVE, id); } catch {}
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+function closeProcess() {
+  flushPendingSave();
+  ui.view = 'list'; ui.activeId = null;
+  try { sessionStorage.removeItem(SS_ACTIVE); } catch {}
+  render();
+}
+function currentProcess() { return ui.activeId ? getProcess(ui.activeId) : null; }
+
+/* ═══════════════════════════════════════════════════════════
+   AUTO-SAVE
+   ═══════════════════════════════════════════════════════════ */
+let saveTimer = null;
+let activeProcessRef = null;
+
+function autosave(p) {
+  clearTimeout(saveTimer);
+  const badge = $('#autosave-badge');
+  if (badge) { badge.classList.add('saving'); badge.innerHTML = `<i class="bi bi-arrow-repeat"></i> A guardar…`; }
+  saveTimer = setTimeout(() => {
+    saveTimer = null;
+    if (upsertProcess(p)) refreshSaveBadge();
+  }, 400);
+}
+function saveNow(p) {
+  if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+  if (upsertProcess(p)) refreshSaveBadge();
+}
+function refreshSaveBadge() {
+  const b = $('#autosave-badge');
+  if (!b) return;
+  b.classList.remove('saving');
+  b.innerHTML = `<i class="bi bi-check2"></i> Guardado ${new Date().toLocaleTimeString('pt-PT', { hour:'2-digit', minute:'2-digit' })}`;
+}
+function flushPendingSave() {
+  if (saveTimer && activeProcessRef) {
+    clearTimeout(saveTimer); saveTimer = null;
+    upsertProcess(activeProcessRef);
+  }
+}
+window.addEventListener('beforeunload', flushPendingSave);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') flushPendingSave();
+});
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER — LISTA
+   ═══════════════════════════════════════════════════════════ */
+function renderList() {
+  const all = loadAll();
+  const filtered = all.filter(p => {
+    if (ui.filterEstado && estadoProcesso(p) !== ui.filterEstado) return false;
+    if (ui.filter) {
+      const q = ui.filter.toLowerCase();
+      if (![p.aluno, p.numero, p.uc, p.semestre].some(f => (f || '').toLowerCase().includes(q))) return false;
+    }
+    return true;
+  });
+  const emCurso = all.filter(p => estadoProcesso(p) !== 'FINALIZADO').length;
+  const final = all.length - emCurso;
+  const aprov = all.filter(p => p.resultado && p.resultado !== 'REPROVADO').length;
+  const reprov = all.filter(p => p.resultado === 'REPROVADO').length;
+  const progresso = all.length ? Math.round(final / all.length * 100) : 0;
+  const recentes = [...all].sort((a,b) => (b.actualizadoEm || '').localeCompare(a.actualizadoEm || '')).slice(0,3);
+
+  return `<div class="dashboard-page" id="dashboard-processos">
+    <section class="dashboard-hero mb-4">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-dot"></span> PAINEL ACADÉMICO</div>
+        <h1>Gestão de avaliações</h1>
+        <p>Acompanha processos, consulta resultados e continua o trabalho onde paraste.</p>
+      </div>
+      <div class="hero-actions">
+        <button class="btn btn-primary" id="btn-novo"><i class="bi bi-plus-lg me-2"></i>Criar processo</button>
+        <button class="btn btn-hero-secondary" id="hero-btn-export"><i class="bi bi-file-earmark-spreadsheet me-2"></i>Exportar dados</button>
+      </div>
+    </section>
+
+    <section class="dashboard-search mb-4" aria-label="Pesquisa de processos">
+      <div class="search-heading"><div><h2>Encontra um processo</h2><p>Pesquisa por aluno, número, unidade curricular ou semestre.</p></div><span class="search-count">${filtered.length} de ${all.length}</span></div>
+      <div class="search-controls">
+        <div class="search-field"><i class="bi bi-search"></i><input id="filtro-text" type="search" autocomplete="off" aria-label="Pesquisar processos" placeholder="Ex.: nome do aluno ou unidade curricular…" value="${esc(ui.filter)}" maxlength="100"><kbd>⌕</kbd></div>
+        <select id="filtro-estado" class="form-select" aria-label="Filtrar por estado">
+          <option value="">Todos os estados</option>
+          <option value="EM_FASE_1" ${ui.filterEstado === 'EM_FASE_1' ? 'selected' : ''}>Em curso · Fase 1</option>
+          <option value="EM_FASE_2" ${ui.filterEstado === 'EM_FASE_2' ? 'selected' : ''}>Em curso · Fase 2</option>
+          <option value="EM_FASE_3" ${ui.filterEstado === 'EM_FASE_3' ? 'selected' : ''}>Em curso · Fase 3</option>
+          <option value="FINALIZADO" ${ui.filterEstado === 'FINALIZADO' ? 'selected' : ''}>Finalizados</option>
+        </select>
+        <button id="btn-clear" class="btn btn-light border">Limpar</button>
+      </div>
+    </section>
+
+    <section class="mb-4" aria-label="Resumo do progresso">
+      <div class="section-heading"><div><h2>Resumo geral</h2><p>Estado actual dos processos registados</p></div><span class="updated-label"><i class="bi bi-shield-check me-1"></i>Guardado neste dispositivo</span></div>
+      <div class="row g-3 dashboard-stats">
+        ${stat('Em curso', emCurso, 'primary', 'bi-hourglass-split')}
+        ${stat('Aprovados', aprov, 'success', 'bi-check-circle-fill')}
+        ${stat('Reprovados', reprov, 'danger', 'bi-x-circle-fill')}
+        ${stat('Total de processos', all.length, 'secondary', 'bi-folder2')}
+      </div>
+      <div class="progress-overview mt-3">
+        <div class="progress-copy"><div><strong>Progresso de conclusão</strong><span>Processos finalizados</span></div><strong class="progress-percent">${progresso}%</strong></div>
+        <div class="progress-track" role="progressbar" aria-label="Percentagem de processos finalizados" aria-valuenow="${progresso}" aria-valuemin="0" aria-valuemax="100"><span style="width:${progresso}%"></span></div>
+        <div class="progress-foot"><span>${final} ${final === 1 ? 'processo concluído' : 'processos concluídos'}</span><span>${emCurso} em curso</span></div>
+      </div>
+    </section>
+
+    <section class="processes-section">
+      <div class="section-heading processes-heading"><div><h2>Processos de avaliação</h2><p>${all.length ? `A gerir ${all.length} ${all.length === 1 ? 'processo' : 'processos'} académicos` : 'Começa por registar o primeiro aluno.'}</p></div>
+        ${all.length ? `<button class="btn btn-outline-primary btn-sm" id="btn-export"><i class="bi bi-download me-1"></i>Exportar CSV</button>` : ''}
+      </div>
+      ${all.length === 0 ? emptyState() : filtered.length === 0
+        ? `<div class="empty-filter card"><div class="card-body text-center py-5"><div class="empty-filter-icon"><i class="bi bi-search"></i></div><h3>Nenhum resultado encontrado</h3><p>Experimenta outro termo de pesquisa ou limpa os filtros.</p><button id="btn-clear-empty" class="btn btn-outline-primary btn-sm">Limpar pesquisa</button></div></div>`
+        : `<div class="card process-table-card"><div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+              <thead><tr class="small"><th class="ps-3">Aluno</th><th class="d-none d-md-table-cell">Unidade curricular · Semestre</th><th>Estado</th><th class="text-end d-none d-sm-table-cell">NF₁</th><th class="text-end d-none d-md-table-cell">NF₂</th><th class="text-end d-none d-lg-table-cell">Rec.</th><th class="d-none d-lg-table-cell">Actualizado</th><th></th></tr></thead>
+              <tbody class="small">${filtered.map(renderRow).join('')}</tbody>
+            </table>
+          </div></div>`}
+      <div class="dashboard-footnote"><span><i class="bi bi-database-check me-1"></i>Os dados ficam guardados localmente neste dispositivo.</span><span>Limite: ${MAX_PROCESSES} processos</span>
+        ${all.length ? `<button id="btn-clear-all" class="btn btn-link btn-sm text-danger p-0">Apagar todos os processos</button>` : ''}
+      </div>
+    </section>
+    ${recentes.length ? `<section class="recent-section mt-4"><div class="section-heading"><div><h2>Acesso recente</h2><p>Continua rapidamente um processo actualizado recentemente.</p></div></div><div class="recent-grid">${recentes.map(p => `<button type="button" class="recent-item" data-open="${esc(p.id)}"><span class="recent-avatar"><i class="bi bi-person"></i></span><span class="recent-main"><strong>${esc(p.aluno || 'Aluno sem nome')}</strong><small>${esc(p.uc || 'Unidade curricular não indicada')}</small></span><span class="recent-status">${esc(estadoLabel(p))}</span><i class="bi bi-arrow-up-right recent-arrow"></i></button>`).join('')}</div></section>` : ''}
+  </div>`;
+}
+function renderRow(p) {
+  return `<tr class="process-row" data-open="${p.id}">
+    <td class="ps-3">
+      <div class="fw-medium" style="color: #0f172a;">${esc(p.aluno || '—')}</div>
+      ${p.numero ? `<div class="text-secondary tabular-nums" style="font-size: 0.7rem;">Nº ${esc(p.numero)}</div>` : ''}
+    </td>
+    <td class="d-none d-md-table-cell">
+      <div>${esc(p.uc || '—')}</div>
+      <div class="text-secondary" style="font-size: 0.7rem;">${esc(p.semestre || '')}</div>
+    </td>
+    <td><span class="badge ${estadoBadgeClass(p)}" style="font-weight: 500;">${estadoLabel(p)}</span></td>
+    <td class="text-end tabular-nums d-none d-sm-table-cell fw-medium">${p.nf1G ?? '—'}</td>
+    <td class="text-end tabular-nums d-none d-md-table-cell fw-medium">${p.nf2G ?? '—'}</td>
+    <td class="text-end tabular-nums d-none d-lg-table-cell">${p.recurso !== '' ? fmt(parseNum(p.recurso)) : '—'}</td>
+    <td class="text-secondary d-none d-lg-table-cell" style="font-size: 0.7rem;">${fmtDate(p.actualizadoEm)}</td>
+    <td class="text-end pe-3">
+      <button data-del="${p.id}" class="btn btn-sm btn-link p-1 text-secondary text-decoration-none" title="Apagar">
+        <i class="bi bi-trash"></i>
+      </button>
+    </td>
+  </tr>`;
+}
+
+function stat(label, value, tone, icon) {
+  return `<div class="col-6 col-md-3">
+    <div class="stat-card d-flex align-items-center gap-2">
+      <div class="stat-icon ${tone}"><i class="bi ${icon}"></i></div>
+      <div class="min-w-0">
+        <div class="text-secondary text-uppercase fw-semibold" style="font-size: 0.625rem; letter-spacing: 0.06em;">${label}</div>
+        <div class="fw-bold tabular-nums text-${tone}" style="font-size: 1.25rem; line-height: 1.1;">${value}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function emptyState() {
+  return `<div class="card">
+    <div class="card-body text-center py-5">
+      <div style="width: 64px; height: 64px; margin: 0 auto; background: #eff6ff; border-radius: 1rem; display: flex; align-items: center; justify-content: center; color: #2563eb;">
+        <i class="bi bi-person-plus" style="font-size: 1.75rem;"></i>
+      </div>
+      <h5 class="mt-3 mb-1 fw-semibold" style="color: #0f172a;">Nenhum processo ainda</h5>
+      <p class="text-secondary small mb-3 mx-auto" style="max-width: 400px;">Cria o primeiro processo. As notas ficam guardadas à medida que as introduzes — não precisas de ter tudo para começar.</p>
+      <button class="btn btn-primary btn-sm" id="btn-novo-empty">
+        <i class="bi bi-plus-lg me-1"></i>Criar primeiro processo
+      </button>
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER — EDIÇÃO
+   ═══════════════════════════════════════════════════════════ */
+function renderEdit(p) {
+  return `<div>
+    <div class="d-flex justify-content-between align-items-start mb-4 flex-wrap gap-2">
+      <div>
+        <button id="btn-back" class="btn btn-link btn-sm p-0 text-decoration-none mb-2 text-secondary">
+          <i class="bi bi-arrow-left me-1"></i>Todos os processos
+        </button>
+        <h4 class="mb-1 fw-bold" style="color: #0f172a; letter-spacing: -0.02em;">${esc(p.aluno)}</h4>
+        <div class="text-secondary small">
+          ${p.numero ? `Nº ${esc(p.numero)} · ` : ''}
+          ${p.uc ? esc(p.uc) : ''}${p.uc && p.semestre ? ' · ' : ''}${p.semestre ? esc(p.semestre) : ''}
+          ${(!p.uc && !p.semestre && !p.numero) ? '<span class="fst-italic">Sem informação adicional</span>' : ''}
+        </div>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <span id="autosave-badge" class="autosave-badge"><i class="bi bi-check2"></i> Guardado</span>
+        <button id="btn-edit-ident" class="btn btn-light border btn-sm" title="Editar identificação">
+          <i class="bi bi-pencil"></i>
+        </button>
+        <button id="btn-delete" class="btn btn-outline-danger btn-sm" title="Apagar processo">
+          <i class="bi bi-trash"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+      <span class="badge ${estadoBadgeClass(p)}" style="font-weight: 500;">${estadoLabel(p)}</span>
+      <span class="text-secondary small">Criado ${fmtDate(p.criadoEm)}</span>
+      <span class="text-secondary small opacity-50">·</span>
+      <span class="text-secondary small">Actualizado ${fmtDate(p.actualizadoEm)}</span>
+    </div>
+
+    ${renderFase1(p)}
+    ${p.fase1Fechada && !isDispensado(p.nf1G) ? renderFase2(p) : ''}
+    ${p.fase2Fechada && !isDispensado(p.nf2G) ? renderFase3(p) : ''}
+    ${p.resultado ? renderResultado(p) : ''}
+  </div>`;
+}
+
+function renderFase1(p) {
+  const s = phase1Status(p);
+  const cls = s.cls === 'closed' ? 'closed' : s.cls === 'ready' ? 'ready' : 'active';
+  return `<div class="phase-card ${cls} mb-3">
+    <div class="phase-header">
+      <div class="phase-number">${s.cls === 'closed' ? '<i class="bi bi-check-lg"></i>' : '1'}</div>
+      <div class="phase-title">
+        <h6>Avaliação Contínua</h6>
+        <small>Notas das ACs e CPF</small>
+      </div>
+      <span class="status-badge ${s.cls}"><i class="bi ${s.icon}"></i> ${s.text}</span>
+    </div>
+    <div class="card-body">
+      ${p.fase1Fechada ? renderFase1Fechada(p) : renderFase1Editor(p)}
+    </div>
+  </div>`;
+}
+
+function renderFase1Editor(p) {
+  const isList = p.macMode === 'list';
+  const v = validateF1(p);
+  return `
+    <p class="text-secondary small mb-3">Introduz as notas à medida que as recebes. Cada alteração fica guardada automaticamente — podes sair e voltar mais tarde.</p>
+
+    <div class="mb-3">
+      <label class="form-label">Modo de introdução do MAC</label>
+      <div class="btn-group btn-group-sm">
+        <button data-mode="list" class="btn ${isList ? 'btn-primary' : 'btn-outline-primary'}">Notas individuais</button>
+        <button data-mode="direct" class="btn ${!isList ? 'btn-primary' : 'btn-outline-primary'}">MAC directo</button>
+      </div>
+    </div>
+
+    ${isList ? renderACsEditor(p) : renderMacEditor(p)}
+
+    <div class="mb-3">
+      <label class="form-label">CPF — Prova de Frequência</label>
+      <div class="input-group input-group-sm has-validation">
+        <input id="input-cpf" type="text" inputmode="decimal" autocomplete="off" value="${esc(p.cpf)}" placeholder="0 a 20" maxlength="6" class="form-control tabular-nums ${p.cpf && parseNum(p.cpf) == null ? 'is-invalid' : ''}">
+        <span class="input-group-text">/ 20</span>
+        <div class="invalid-feedback">Valor inválido. Deve estar entre 0 e 20.</div>
+      </div>
+    </div>
+
+    <div id="preview-f1" class="p-3 rounded mb-3" style="background: #f8fafc; border: 1px solid #e2e8f0;"></div>
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div class="small text-secondary">
+        ${v.ok
+          ? '<i class="bi bi-check-circle-fill text-success me-1"></i>Tudo pronto. Podes fechar a fase.'
+          : `<i class="bi bi-info-circle me-1"></i>${v.issues.join(' · ')}`}
+      </div>
+      <button id="btn-fechar-f1" class="btn btn-primary" ${v.ok ? '' : 'disabled'}>
+        <i class="bi bi-lock me-1"></i>Fechar Fase 1
+      </button>
+    </div>
+  `;
+}
+
+function renderACsEditor(p) {
+  return `<div class="mb-3">
+    <label class="form-label">Avaliações Contínuas <span class="text-secondary fw-normal">(cada uma de 0 a 5)</span></label>
+    <div class="vstack gap-2">
+      ${p.acs.map((v, i) => {
+        const num = parseNum(v);
+        const invalid = v !== '' && (num == null || num < 0 || num > 5);
+        return `<div class="input-group input-group-sm ac-input-group has-validation">
+          <span class="input-group-text fw-medium" style="min-width: 56px;">AC ${i + 1}</span>
+          <input data-ac="${i}" type="text" inputmode="decimal" autocomplete="off" value="${esc(v)}" placeholder="0 a 5" maxlength="5" class="form-control tabular-nums ${invalid ? 'is-invalid' : ''}">
+          <span class="input-group-text">/ 5</span>
+          <button data-remove="${i}" class="btn btn-outline-danger" ${p.acs.length <= 1 ? 'disabled' : ''} title="Remover"><i class="bi bi-x-lg"></i></button>
+          <div class="invalid-feedback">Valor inválido. Deve estar entre 0 e 5.</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <button id="btn-add-ac" class="btn btn-link btn-sm p-0 mt-2 text-decoration-none">
+      <i class="bi bi-plus-lg me-1"></i>Adicionar avaliação
+    </button>
+  </div>`;
+}
+
+function renderMacEditor(p) {
+  const num = parseNum(p.macDirect);
+  const invalid = p.macDirect !== '' && (num == null || num < 0 || num > 5);
+  return `<div class="mb-3">
+    <label class="form-label">MAC — Média das Avaliações Contínuas <span class="text-secondary fw-normal">(0 a 5)</span></label>
+    <div class="input-group input-group-sm has-validation">
+      <input id="input-mac" type="text" inputmode="decimal" autocomplete="off" value="${esc(p.macDirect)}" placeholder="0 a 5" maxlength="5" class="form-control tabular-nums ${invalid ? 'is-invalid' : ''}">
+      <span class="input-group-text">/ 5</span>
+      <div class="invalid-feedback">Valor inválido. Deve estar entre 0 e 5.</div>
+    </div>
+  </div>`;
+}
+
+function renderFase1Fechada(p) {
+  const mac = getMAC(p), cpf = parseNum(p.cpf), disp = isDispensado(p.nf1G);
+  return `<div class="small">
+    <div class="row g-2 mb-2">
+      <div class="col-6 col-md-3"><div class="text-secondary">MAC</div><div class="fw-semibold tabular-nums">${fmt(mac)}</div></div>
+      <div class="col-6 col-md-3"><div class="text-secondary">CPF</div><div class="fw-semibold tabular-nums">${fmt(cpf)}</div></div>
+      <div class="col-6 col-md-3"><div class="text-secondary">NF₁</div><div class="fw-semibold tabular-nums">${fmt(p.nf1)}</div></div>
+      <div class="col-6 col-md-3"><div class="text-secondary">Arredondado</div><div class="fw-bold tabular-nums">${p.nf1G}</div></div>
+    </div>
+    <code class="calc">NF₁ = 0.6 × (4 × ${fmt(mac)}) + 0.4 × ${fmt(cpf)} = ${fmt(p.nf1)} → arredondado ${p.nf1G}</code>
+    <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap gap-2">
+      <div class="small ${disp ? 'text-success' : 'text-secondary'}">
+        ${disp ? '<i class="bi bi-check-circle-fill me-1"></i>≥ 14 · Dispensado' : '<i class="bi bi-arrow-right me-1"></i>< 14 · Segue para exame'}
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <span class="text-secondary" style="font-size: 0.7rem;">Fechada ${fmtDate(p.fase1FechadaEm)}</span>
+        <button id="btn-reabrir-f1" class="btn btn-light border btn-sm">
+          <i class="bi bi-unlock me-1"></i>Reabrir
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderFase2(p) {
+  const s = phase2Status(p);
+  const cls = s.cls === 'closed' ? 'closed' : s.cls === 'ready' ? 'ready' : 'active';
+  return `<div class="phase-card ${cls} mb-3">
+    <div class="phase-header">
+      <div class="phase-number">${s.cls === 'closed' ? '<i class="bi bi-check-lg"></i>' : '2'}</div>
+      <div class="phase-title">
+        <h6>Exame</h6>
+        <small>Nota do exame da 2.ª fase</small>
+      </div>
+      <span class="status-badge ${s.cls}"><i class="bi ${s.icon}"></i> ${s.text}</span>
+    </div>
+    <div class="card-body">
+      ${p.fase2Fechada ? renderFase2Fechada(p) : renderFase2Editor(p)}
+    </div>
+  </div>`;
+}
+
+function renderFase2Editor(p) {
+  const need = exameNecessario(p.nf1G);
+  const feasible = need <= 20;
+  const v = validateF2(p);
+  return `
+    <div class="hint-box mb-3 ${feasible ? '' : 'warning'}">
+      <i class="bi bi-info-circle-fill mt-1"></i>
+      <div>${feasible
+        ? `Para dispensar precisas de <strong>${fmt(need)}</strong> valores no exame.`
+        : `Mesmo com 20 no exame não dispensas. Segue para recurso.`}</div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Nota do Exame <span class="text-secondary fw-normal">(0 a 20)</span></label>
+      <div class="input-group input-group-sm has-validation">
+        <input id="input-exame" type="text" inputmode="decimal" autocomplete="off" value="${esc(p.exame)}" placeholder="0 a 20" maxlength="6" class="form-control tabular-nums ${p.exame && parseNum(p.exame) == null ? 'is-invalid' : ''}">
+        <span class="input-group-text">/ 20</span>
+        <div class="invalid-feedback">Valor inválido. Deve estar entre 0 e 20.</div>
+      </div>
+    </div>
+    <div id="preview-f2" class="p-3 rounded mb-3" style="background: #f8fafc; border: 1px solid #e2e8f0;"></div>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div class="small text-secondary">
+        ${v.ok ? '<i class="bi bi-check-circle-fill text-success me-1"></i>Pronto.' : `<i class="bi bi-info-circle me-1"></i>${v.issues.join(' · ')}`}
+      </div>
+      <button id="btn-fechar-f2" class="btn btn-primary" ${v.ok ? '' : 'disabled'}>
+        <i class="bi bi-lock me-1"></i>Fechar Fase 2
+      </button>
+    </div>
+  `;
+}
+
+function renderFase2Fechada(p) {
+  const exame = parseNum(p.exame), disp = isDispensado(p.nf2G);
+  return `<div class="small">
+    <div class="row g-2 mb-2">
+      <div class="col-6 col-md-3"><div class="text-secondary">NF₁ (guardado)</div><div class="fw-semibold tabular-nums">${p.nf1G}</div></div>
+      <div class="col-6 col-md-3"><div class="text-secondary">Exame</div><div class="fw-semibold tabular-nums">${fmt(exame)}</div></div>
+      <div class="col-6 col-md-3"><div class="text-secondary">NF₂</div><div class="fw-semibold tabular-nums">${fmt(p.nf2)}</div></div>
+      <div class="col-6 col-md-3"><div class="text-secondary">Arredondado</div><div class="fw-bold tabular-nums">${p.nf2G}</div></div>
+    </div>
+    <code class="calc">NF₂ = 0.6 × ${p.nf1G} + 0.4 × ${fmt(exame)} = ${fmt(p.nf2)} → arredondado ${p.nf2G}</code>
+    <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap gap-2">
+      <div class="small ${disp ? 'text-success' : 'text-secondary'}">
+        ${disp ? '<i class="bi bi-check-circle-fill me-1"></i>≥ 14 · Dispensado' : '<i class="bi bi-arrow-right me-1"></i>< 14 · Segue para recurso'}
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <span class="text-secondary" style="font-size: 0.7rem;">Fechada ${fmtDate(p.fase2FechadaEm)}</span>
+        <button id="btn-reabrir-f2" class="btn btn-light border btn-sm">
+          <i class="bi bi-unlock me-1"></i>Reabrir
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderFase3(p) {
+  const s = phase3Status(p);
+  const cls = s.cls === 'closed' ? 'closed' : s.cls === 'ready' ? 'ready' : 'active';
+  return `<div class="phase-card ${cls} mb-3">
+    <div class="phase-header">
+      <div class="phase-number">${s.cls === 'closed' ? '<i class="bi bi-check-lg"></i>' : '3'}</div>
+      <div class="phase-title">
+        <h6>Recurso</h6>
+        <small>Nota seca — aprova com ≥ 9,5</small>
+      </div>
+      <span class="status-badge ${s.cls}"><i class="bi ${s.icon}"></i> ${s.text}</span>
+    </div>
+    <div class="card-body">
+      ${p.fase3Fechada ? renderFase3Fechada(p) : renderFase3Editor(p)}
+    </div>
+  </div>`;
+}
+
+function renderFase3Editor(p) {
+  const v = validateF3(p);
+  return `
+    <div class="hint-box mb-3">
+      <i class="bi bi-info-circle-fill mt-1"></i>
+      <div>No recurso a nota é <strong>seca</strong>. Aprovas com ≥ <strong>9,5</strong>.</div>
+    </div>
+    <div class="mb-3">
+      <label class="form-label">Nota do Recurso <span class="text-secondary fw-normal">(0 a 20)</span></label>
+      <div class="input-group input-group-sm has-validation">
+        <input id="input-recurso" type="text" inputmode="decimal" autocomplete="off" value="${esc(p.recurso)}" placeholder="0 a 20" maxlength="6" class="form-control tabular-nums ${p.recurso && parseNum(p.recurso) == null ? 'is-invalid' : ''}">
+        <span class="input-group-text">/ 20</span>
+        <div class="invalid-feedback">Valor inválido. Deve estar entre 0 e 20.</div>
+      </div>
+    </div>
+    <div id="preview-f3" class="p-3 rounded mb-3" style="background: #f8fafc; border: 1px solid #e2e8f0;"></div>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <div class="small text-secondary">
+        ${v.ok ? '<i class="bi bi-check-circle-fill text-success me-1"></i>Pronto.' : `<i class="bi bi-info-circle me-1"></i>${v.issues.join(' · ')}`}
+      </div>
+      <button id="btn-fechar-f3" class="btn btn-primary" ${v.ok ? '' : 'disabled'}>
+        <i class="bi bi-lock me-1"></i>Fechar Fase 3
+      </button>
+    </div>
+  `;
+}
+
+function renderFase3Fechada(p) {
+  const r = parseNum(p.recurso), pass = isAprovadoRecurso(r);
+  return `<div class="small">
+    <div class="row g-2 mb-2">
+      <div class="col-6 col-md-3"><div class="text-secondary">Nota do recurso</div><div class="fw-semibold tabular-nums">${fmt(r)}</div></div>
+      <div class="col-6 col-md-3"><div class="text-secondary">Arredondamento</div><div class="fw-semibold tabular-nums">${roundHalfUp(r)}</div></div>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mt-2 flex-wrap gap-2">
+      <div class="small ${pass ? 'text-success' : 'text-danger'}">
+        ${pass ? '<i class="bi bi-check-circle-fill me-1"></i>≥ 9,5 · Aprovado' : '<i class="bi bi-x-circle-fill me-1"></i>< 9,5 · Reprovado'}
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <span class="text-secondary" style="font-size: 0.7rem;">Fechada ${fmtDate(p.fase3FechadaEm)}</span>
+        <button id="btn-reabrir-f3" class="btn btn-light border btn-sm">
+          <i class="bi bi-unlock me-1"></i>Reabrir
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderResultado(p) {
+  const success = p.resultado !== 'REPROVADO';
+  const labels = {
+    DISPENSADO_F1:    { title: 'Dispensado',  sub: 'na 1.ª fase' },
+    DISPENSADO_F2:    { title: 'Dispensado',  sub: 'na 2.ª fase' },
+    APROVADO_RECURSO: { title: 'Aprovado',    sub: 'no recurso' },
+    REPROVADO:        { title: 'Reprovado',   sub: 'sem dispensa' },
+  };
+  const meta = labels[p.resultado] || { title: 'Resultado', sub: '' };
+  const mac = getMAC(p), cpf = parseNum(p.cpf);
+  const exame = parseNum(p.exame), recurso = parseNum(p.recurso);
+  const showNF2 = p.resultado !== 'DISPENSADO_F1';
+  const showRec = p.resultado === 'APROVADO_RECURSO' || p.resultado === 'REPROVADO';
+
+  return `<div id="print-area" class="card mt-4">
+    <div class="card-body p-4 p-sm-5">
+      <div class="text-center pb-4 mb-4 border-bottom">
+        <div class="result-icon mx-auto mb-3 ${success ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'}">
+          <i class="bi ${success ? 'bi-check-lg' : 'bi-x-lg'}" style="font-size: 1.75rem;"></i>
+        </div>
+        <h2 class="mb-1 fw-bold" style="color: #0f172a; letter-spacing: -0.02em;">${meta.title}</h2>
+        <p class="text-secondary small mb-0">${meta.sub}</p>
+      </div>
+
+      <h6 class="text-uppercase text-secondary fw-semibold mb-3" style="font-size: 0.7rem; letter-spacing: 0.06em;">Memória de cálculo</h6>
+
+      <div class="d-flex flex-column gap-3 small">
+        <div>
+          <div class="fw-semibold mb-1" style="color: #0f172a;">Fase 1 · Avaliação Contínua</div>
+          <code class="calc">NF₁ = 0.6 × (4 × ${fmt(mac)}) + 0.4 × ${fmt(cpf)}
+    = ${fmt(0.6 * 4 * mac)} + ${fmt(0.4 * cpf)}
+    = <strong>${fmt(p.nf1)}</strong> → arredondado <strong>${p.nf1G}</strong></code>
+        </div>
+        ${showNF2 ? `<div>
+          <div class="fw-semibold mb-1" style="color: #0f172a;">Fase 2 · Exame</div>
+          <code class="calc">NF₂ = 0.6 × ${p.nf1G} + 0.4 × ${fmt(exame)}
+    = ${fmt(0.6 * p.nf1G)} + ${fmt(0.4 * exame)}
+    = <strong>${fmt(p.nf2)}</strong> → arredondado <strong>${p.nf2G}</strong></code>
+        </div>` : ''}
+        ${showRec ? `<div>
+          <div class="fw-semibold mb-1" style="color: #0f172a;">Fase 3 · Recurso</div>
+          <div class="border rounded p-2">
+            <div class="d-flex justify-content-between"><span class="text-secondary">Nota do recurso</span><span class="tabular-nums fw-medium">${fmt(recurso)}</span></div>
+            <div class="d-flex justify-content-between"><span class="text-secondary">Arredondamento</span><span class="tabular-nums fw-medium">${roundHalfUp(recurso)}</span></div>
+          </div>
+        </div>` : ''}
+      </div>
+
+      <div class="mt-4 pt-4 border-top no-print d-flex flex-column flex-sm-row gap-2">
+        <button id="btn-back-list" class="btn btn-primary flex-fill">
+          <i class="bi bi-arrow-left me-1"></i>Voltar aos processos
+        </button>
+        <button id="btn-print" class="btn btn-light border">
+          <i class="bi bi-printer me-1"></i>Imprimir
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BIND — LISTA
+   ═══════════════════════════════════════════════════════════ */
+function bindList() {
+  $('#btn-novo')?.addEventListener('click', () => openIdentModal());
+  $('#nav-btn-novo')?.addEventListener('click', () => openIdentModal());
+  const doExport = () => exportCSV();
+  $('#nav-btn-export')?.addEventListener('click', doExport);
+  $('#hero-btn-export')?.addEventListener('click', doExport);
+  $('#btn-clear-empty')?.addEventListener('click', () => { ui.filter = ''; ui.filterEstado = ''; renderListOnly(); });
+  $('#btn-novo-empty')?.addEventListener('click', () => openIdentModal());
+  $('#filtro-text')?.addEventListener('input', e => { const value = e.target.value; const start = e.target.selectionStart; const end = e.target.selectionEnd; ui.filter = value; renderListOnly(); const next = $('#filtro-text'); if (next) { next.focus({ preventScroll: true }); try { next.setSelectionRange(start, end); } catch {} } });
+  $('#filtro-estado')?.addEventListener('change', e => { ui.filterEstado = e.target.value; renderListOnly(); });
+  $('#btn-clear')?.addEventListener('click', () => { ui.filter = ''; ui.filterEstado = ''; renderListOnly(); });
+
+  $$('[data-open]').forEach(tr => {
+    tr.addEventListener('click', e => {
+      if (e.target.closest('[data-del]')) return;
+      openProcess(tr.dataset.open);
+    });
+  });
+
+  $$('[data-del]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const p = getProcess(btn.dataset.del);
+      if (!p) return;
+      const aviso = p.resultado ? `\n\n⚠️ Este processo já tem resultado final (${estadoLabel(p)}).` : '';
+      if (confirm(`Apagar o processo de "${p.aluno}"?${aviso}\n\nEsta acção não pode ser desfeita.`)) {
+        removeProcess(p.id);
+        if (ui.activeId === p.id) closeProcess();
+        showToast('Processo apagado.');
+        render();
+      }
+    });
+  });
+
+  $('#btn-clear-all')?.addEventListener('click', () => {
+    const all = loadAll();
+    if (!all.length) return;
+    if (confirm(`Apagar TODOS os ${all.length} processos?\n\nEsta acção não pode ser desfeita.`)) {
+      saveAll([]);
+      closeProcess();
+      showToast('Todos os processos apagados.');
+    }
+  });
+
+  $('#btn-export')?.addEventListener('click', () => exportCSV());
+}
+
+function renderListOnly() {
+  activeProcessRef = null;
+  $('#view').innerHTML = renderList();
+  bindList();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BIND — EDIÇÃO
+   ═══════════════════════════════════════════════════════════ */
+function bindEdit(p) {
+  activeProcessRef = p;
+
+  $('#btn-back').addEventListener('click', () => closeProcess());
+  $('#btn-edit-ident').addEventListener('click', () => openIdentModal(p.id));
+  $('#btn-delete').addEventListener('click', () => {
+    const aviso = p.resultado ? `\n\n⚠️ Este processo já tem resultado final.` : '';
+    if (confirm(`Apagar o processo de "${p.aluno}"?${aviso}\n\nEsta acção não pode ser desfeita.`)) {
+      removeProcess(p.id);
+      closeProcess();
+      showToast('Processo apagado.');
+    }
+  });
+
+  refreshSaveBadge();
+
+  /* FASE 1 */
+  if (!p.fase1Fechada) {
+    $$('[data-mode]').forEach(btn => btn.addEventListener('click', () => {
+      const m = btn.dataset.mode;
+      if (m === p.macMode) return;
+      if (m === 'direct') {
+        const mac = getMAC(p);
+        if (mac != null && !confirm('Converter para MAC directo? As ACs individuais serão substituídas pela média.')) return;
+        if (mac != null) p.macDirect = mac.toFixed(2).replace('.', ',');
+      } else {
+        const n = parseNum(p.macDirect);
+        if (n != null && n >= 0 && n <= 5) p.acs = [String(n)];
+      }
+      p.macMode = m;
+      saveNow(p);
+      render();
+    }));
+
+    $$('[data-ac]').forEach(inp => inp.addEventListener('input', () => {
+      p.acs[+inp.dataset.ac] = inp.value;
+      const v = parseNum(inp.value);
+      const invalid = inp.value !== '' && (v == null || v < 0 || v > 5);
+      inp.classList.toggle('is-invalid', invalid);
+      autosave(p);
+      updatePreviewF1(p);
+      refreshF1Button(p);
+    }));
+
+    const macInp = $('#input-mac');
+    if (macInp) macInp.addEventListener('input', () => {
+      p.macDirect = macInp.value;
+      const v = parseNum(macInp.value);
+      const invalid = macInp.value !== '' && (v == null || v < 0 || v > 5);
+      macInp.classList.toggle('is-invalid', invalid);
+      autosave(p);
+      updatePreviewF1(p);
+      refreshF1Button(p);
+    });
+
+    const cpfInp = $('#input-cpf');
+    if (cpfInp) cpfInp.addEventListener('input', () => {
+      p.cpf = cpfInp.value;
+      const v = parseNum(cpfInp.value);
+      const invalid = cpfInp.value !== '' && (v == null || v < 0 || v > 20);
+      cpfInp.classList.toggle('is-invalid', invalid);
+      autosave(p);
+      updatePreviewF1(p);
+      refreshF1Button(p);
+    });
+
+    $('#btn-add-ac')?.addEventListener('click', () => {
+      p.acs.push('');
+      saveNow(p);
+      render();
+      const inputs = $$('[data-ac]');
+      inputs[inputs.length - 1]?.focus();
+    });
+
+    $$('[data-remove]').forEach(btn => btn.addEventListener('click', () => {
+      if (p.acs.length <= 1) return;
+      p.acs.splice(+btn.dataset.remove, 1);
+      saveNow(p);
+      render();
+    }));
+
+    $('#btn-fechar-f1').addEventListener('click', () => {
+      const v = validateF1(p);
+      if (!v.ok) { showToast(v.issues.join(' · '), 'error'); return; }
+      if (!fecharFase1(p)) return;
+      saveNow(p);
+      showToast(p.resultado === 'DISPENSADO_F1' ? 'Dispensado na 1.ª fase!' : 'Fase 1 fechada.');
+      render();
+    });
+
+    updatePreviewF1(p);
+    refreshF1Button(p);
+  } else {
+    $('#btn-reabrir-f1')?.addEventListener('click', () => {
+      if (reabrirFase1(p)) { saveNow(p); render(); }
+    });
+  }
+
+  /* FASE 2 */
+  if (p.fase1Fechada && !isDispensado(p.nf1G)) {
+    if (!p.fase2Fechada) {
+      const inp = $('#input-exame');
+      if (inp) inp.addEventListener('input', () => {
+        p.exame = inp.value;
+        const v = parseNum(inp.value);
+        inp.classList.toggle('is-invalid', inp.value !== '' && (v == null || v < 0 || v > 20));
+        autosave(p);
+        updatePreviewF2(p);
+        refreshF2Button(p);
+      });
+      $('#btn-fechar-f2')?.addEventListener('click', () => {
+        const v = validateF2(p);
+        if (!v.ok) { showToast(v.issues.join(' · '), 'error'); return; }
+        if (!fecharFase2(p)) return;
+        saveNow(p);
+        showToast(p.resultado === 'DISPENSADO_F2' ? 'Dispensado na 2.ª fase!' : 'Fase 2 fechada.');
+        render();
+      });
+      updatePreviewF2(p);
+      refreshF2Button(p);
+    } else {
+      $('#btn-reabrir-f2')?.addEventListener('click', () => {
+        if (reabrirFase2(p)) { saveNow(p); render(); }
+      });
+    }
+  }
+
+  /* FASE 3 */
+  if (p.fase2Fechada && !isDispensado(p.nf2G)) {
+    if (!p.fase3Fechada) {
+      const inp = $('#input-recurso');
+      if (inp) inp.addEventListener('input', () => {
+        p.recurso = inp.value;
+        const v = parseNum(inp.value);
+        inp.classList.toggle('is-invalid', inp.value !== '' && (v == null || v < 0 || v > 20));
+        autosave(p);
+        updatePreviewF3(p);
+        refreshF3Button(p);
+      });
+      $('#btn-fechar-f3')?.addEventListener('click', () => {
+        const v = validateF3(p);
+        if (!v.ok) { showToast(v.issues.join(' · '), 'error'); return; }
+        if (!fecharFase3(p)) return;
+        saveNow(p);
+        showToast(p.resultado === 'APROVADO_RECURSO' ? 'Aprovado no recurso!' : 'Reprovado.');
+        render();
+      });
+      updatePreviewF3(p);
+      refreshF3Button(p);
+    } else {
+      $('#btn-reabrir-f3')?.addEventListener('click', () => {
+        if (reabrirFase3(p)) { saveNow(p); render(); }
+      });
+    }
+  }
+
+  /* RESULTADO */
+  $('#btn-back-list')?.addEventListener('click', () => closeProcess());
+  $('#btn-print')?.addEventListener('click', () => window.print());
+}
+
+function refreshF1Button(p) {
+  const btn = $('#btn-fechar-f1');
+  if (!btn) return;
+  const v = validateF1(p);
+  btn.disabled = !v.ok;
+  const hint = btn.parentElement.querySelector('.small.text-secondary');
+  if (hint) {
+    hint.innerHTML = v.ok
+      ? '<i class="bi bi-check-circle-fill text-success me-1"></i>Tudo pronto. Podes fechar a fase.'
+      : `<i class="bi bi-info-circle me-1"></i>${v.issues.join(' · ')}`;
+  }
+  const badge = document.querySelector('.phase-card .status-badge');
+  if (badge) {
+    const s = phase1Status(p);
+    badge.className = `status-badge ${s.cls}`;
+    badge.innerHTML = `<i class="bi ${s.icon}"></i> ${s.text}`;
+  }
+}
+function refreshF2Button(p) {
+  const btn = $('#btn-fechar-f2');
+  if (!btn) return;
+  const v = validateF2(p);
+  btn.disabled = !v.ok;
+  const hint = btn.parentElement.querySelector('.small.text-secondary');
+  if (hint) hint.innerHTML = v.ok
+    ? '<i class="bi bi-check-circle-fill text-success me-1"></i>Pronto.'
+    : `<i class="bi bi-info-circle me-1"></i>${v.issues.join(' · ')}`;
+}
+function refreshF3Button(p) {
+  const btn = $('#btn-fechar-f3');
+  if (!btn) return;
+  const v = validateF3(p);
+  btn.disabled = !v.ok;
+  const hint = btn.parentElement.querySelector('.small.text-secondary');
+  if (hint) hint.innerHTML = v.ok
+    ? '<i class="bi bi-check-circle-fill text-success me-1"></i>Pronto.'
+    : `<i class="bi bi-info-circle me-1"></i>${v.issues.join(' · ')}`;
+}
+
+function updatePreviewF1(p) {
+  const el = $('#preview-f1'); if (!el) return;
+  const mac = getMAC(p), cpf = parseNum(p.cpf);
+  if (mac == null || cpf == null) {
+    el.innerHTML = `<p class="small text-secondary mb-0"><i class="bi bi-info-circle me-1"></i>Preenche os campos para ver o cálculo em tempo real.</p>`; return;
+  }
+  if (mac < 0 || mac > 5 || cpf < 0 || cpf > 20) {
+    el.innerHTML = `<p class="small text-danger mb-0"><i class="bi bi-exclamation-triangle me-1"></i>Corrige os valores assinalados.</p>`; return;
+  }
+  const nf1 = calcNF1(mac, cpf), nf1G = roundHalfUp(nf1);
+  const disp = isDispensado(nf1G), need = exameNecessario(nf1G), feasible = need <= 20;
+  el.innerHTML = `<div class="small">
+    <div class="d-flex justify-content-between mb-1"><span class="text-secondary">MAC</span><span class="fw-semibold tabular-nums">${fmt(mac)}</span></div>
+    <div class="d-flex justify-content-between"><span class="text-secondary">CPF</span><span class="fw-semibold tabular-nums">${fmt(cpf)}</span></div>
+    <hr class="my-2">
+    <code class="calc">NF₁ = 0.6 × (4 × ${fmt(mac)}) + 0.4 × ${fmt(cpf)} = <strong>${fmt(nf1)}</strong></code>
+    <div class="d-flex justify-content-between align-items-center mt-2">
+      <span class="text-secondary">Arredondado</span>
+      <span class="fw-bold tabular-nums">${nf1G} <span class="badge ${disp ? 'bg-success' : 'bg-warning text-dark'} ms-1">${disp ? 'Dispensado' : 'Vai a exame'}</span></span>
+    </div>
+    ${!disp ? `<div class="mt-2 small text-secondary">${feasible ? `Para dispensar no exame precisas de <strong class="text-body">${fmt(need)}</strong>.` : `Mesmo com 20 no exame não dispensas.`}</div>` : ''}
+  </div>`;
+}
+
+function updatePreviewF2(p) {
+  const el = $('#preview-f2'); if (!el) return;
+  const ex = parseNum(p.exame);
+  if (ex == null) { el.innerHTML = `<p class="small text-secondary mb-0"><i class="bi bi-info-circle me-1"></i>Introduz a nota do exame.</p>`; return; }
+  if (ex < 0 || ex > 20) { el.innerHTML = `<p class="small text-danger mb-0"><i class="bi bi-exclamation-triangle me-1"></i>Valor inválido.</p>`; return; }
+  const nf2 = calcNF2(p.nf1G, ex), nf2G = roundHalfUp(nf2), disp = isDispensado(nf2G);
+  el.innerHTML = `<div class="small">
+    <div class="d-flex justify-content-between mb-1"><span class="text-secondary">NF₁ (guardado)</span><span class="fw-semibold tabular-nums">${p.nf1G}</span></div>
+    <div class="d-flex justify-content-between"><span class="text-secondary">Exame</span><span class="fw-semibold tabular-nums">${fmt(ex)}</span></div>
+    <hr class="my-2">
+    <code class="calc">NF₂ = 0.6 × ${p.nf1G} + 0.4 × ${fmt(ex)} = <strong>${fmt(nf2)}</strong></code>
+    <div class="d-flex justify-content-between align-items-center mt-2">
+      <span class="text-secondary">Arredondado</span>
+      <span class="fw-bold tabular-nums">${nf2G} <span class="badge ${disp ? 'bg-success' : 'bg-warning text-dark'} ms-1">${disp ? 'Dispensado' : 'Vai a recurso'}</span></span>
+    </div>
+  </div>`;
+}
+
+function updatePreviewF3(p) {
+  const el = $('#preview-f3'); if (!el) return;
+  const r = parseNum(p.recurso);
+  if (r == null) { el.innerHTML = `<p class="small text-secondary mb-0"><i class="bi bi-info-circle me-1"></i>Introduz a nota do recurso.</p>`; return; }
+  if (r < 0 || r > 20) { el.innerHTML = `<p class="small text-danger mb-0"><i class="bi bi-exclamation-triangle me-1"></i>Valor inválido.</p>`; return; }
+  const rounded = roundHalfUp(r), pass = rounded >= 10;
+  el.innerHTML = `<div class="small">
+    <div class="d-flex justify-content-between mb-1"><span class="text-secondary">Nota do recurso</span><span class="fw-semibold tabular-nums">${fmt(r)}</span></div>
+    <div class="d-flex justify-content-between"><span class="text-secondary">Após arredondamento</span><span class="fw-bold tabular-nums">${rounded}</span></div>
+    <hr class="my-2">
+    <div class="d-flex justify-content-between align-items-center">
+      <span class="text-secondary">Resultado</span>
+      <span class="badge ${pass ? 'bg-success' : 'bg-danger'}">${pass ? 'Aprovado' : 'Reprovado'}</span>
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MODAL
+   ═══════════════════════════════════════════════════════════ */
+let identModalMode = { mode: 'new', id: null };
+
+function openIdentModal(editId = null) {
+  if (editId !== null && typeof editId !== 'string') editId = null;
+  let p = null;
+  if (editId) { p = getProcess(editId); if (!p) editId = null; }
+  identModalMode = editId ? { mode: 'edit', id: editId } : { mode: 'new', id: null };
+
+  if (p) {
+    $('#modal-ident-title').textContent = 'Editar identificação';
+    $('#btn-ident-confirm').textContent = 'Guardar';
+    $('#ident-aluno').value = p.aluno;
+    $('#ident-numero').value = p.numero;
+    $('#ident-uc').value = p.uc;
+    $('#ident-semestre').value = p.semestre;
+  } else {
+    $('#modal-ident-title').textContent = 'Novo processo';
+    $('#btn-ident-confirm').textContent = 'Criar processo';
+    $('#ident-aluno').value = '';
+    $('#ident-numero').value = '';
+    $('#ident-uc').value = '';
+    $('#ident-semestre').value = '';
+  }
+  $('#ident-aluno').classList.remove('is-invalid');
+  $('#ident-aluno-err').classList.remove('show');
+  bootstrap.Modal.getOrCreateInstance($('#modal-ident')).show();
+  setTimeout(() => $('#ident-aluno').focus(), 250);
+}
+
+function bindIdentModal() {
+  $('#btn-ident-confirm').addEventListener('click', () => {
+    const aluno = $('#ident-aluno').value.trim();
+    if (!aluno) {
+      $('#ident-aluno').classList.add('is-invalid');
+      $('#ident-aluno-err').classList.add('show');
+      $('#ident-aluno').focus();
+      return;
+    }
+    const data = {
+      aluno,
+      numero: $('#ident-numero').value,
+      uc: $('#ident-uc').value,
+      semestre: $('#ident-semestre').value,
+    };
+    const modal = bootstrap.Modal.getOrCreateInstance($('#modal-ident'));
+
+    if (identModalMode.mode === 'edit') {
+      const p = getProcess(identModalMode.id);
+      if (p) {
+        Object.assign(p, { aluno: data.aluno, numero: data.numero.trim(), uc: data.uc.trim(), semestre: data.semestre.trim() });
+        upsertProcess(p);
+      }
+      modal.hide();
+      showToast('Identificação actualizada.');
+      render();
+    } else {
+      // Duplicado?
+      const all = loadAll();
+      const dupe = all.find(x =>
+        (x.aluno || '').toLowerCase() === data.aluno.toLowerCase() &&
+        (x.uc || '').toLowerCase() === data.uc.trim().toLowerCase() &&
+        (x.semestre || '').toLowerCase() === data.semestre.trim().toLowerCase()
+      );
+      if (dupe && !confirm(`Já existe um processo de "${dupe.aluno}"${dupe.uc ? ` para ${dupe.uc}` : ''}${dupe.semestre ? ` (${dupe.semestre})` : ''}.\n\nCriar mesmo assim?`)) {
+        return;
+      }
+      const p = novoProcesso(data);
+      if (!upsertProcess(p)) { modal.hide(); return; }
+      modal.hide();
+      openProcess(p.id);
+      showToast('Processo criado.');
+    }
+  });
+
+  $('#ident-aluno').addEventListener('input', () => {
+    if ($('#ident-aluno').value.trim()) {
+      $('#ident-aluno').classList.remove('is-invalid');
+      $('#ident-aluno-err').classList.remove('show');
+    }
+  });
+  $('#ident-aluno').addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); $('#btn-ident-confirm').click(); }
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   EXPORT CSV
+   ═══════════════════════════════════════════════════════════ */
+function exportCSV() {
+  const all = loadAll();
+  if (!all.length) { showToast('Sem processos para exportar.', 'error'); return; }
+  const headers = ['Criado','Actualizado','Aluno','Nº','UC','Semestre','Estado','MAC','CPF','NF1','NF1 (arr.)','Exame','NF2','NF2 (arr.)','Recurso','Resultado'];
+  const rows = all.map(p => [
+    fmtDate(p.criadoEm), fmtDate(p.actualizadoEm),
+    p.aluno, p.numero, p.uc, p.semestre,
+    estadoLabel(p),
+    fmt(getMAC(p)), fmt(parseNum(p.cpf)),
+    p.nf1 != null ? fmt(p.nf1) : '', p.nf1G ?? '',
+    p.exame !== '' ? fmt(parseNum(p.exame)) : '',
+    p.nf2 != null ? fmt(p.nf2) : '', p.nf2G ?? '',
+    p.recurso !== '' ? fmt(parseNum(p.recurso)) : '',
+    p.resultado || '',
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(c => `"${String(c ?? '').replace(/"/g, '""')}"`).join(';')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `processos-ugs-${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV exportado.');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER GLOBAL
+   ═══════════════════════════════════════════════════════════ */
+function render() {
+  const navActions = $('.nav-actions');
+  if (navActions) navActions.hidden = ui.view === 'edit';
+  const v = $('#view');
+  if (ui.view === 'edit') {
+    const p = currentProcess();
+    if (!p) { ui.view = 'list'; ui.activeId = null; try { sessionStorage.removeItem(SS_ACTIVE); } catch {} return render(); }
+    v.innerHTML = renderEdit(p);
+    bindEdit(p);
+  } else {
+    activeProcessRef = null;
+    v.innerHTML = renderList();
+    bindList();
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INIT
+   ═══════════════════════════════════════════════════════════ */
+function init() {
+  bindIdentModal();
+  if (ui.activeId && !getProcess(ui.activeId)) {
+    ui.activeId = null;
+    try { sessionStorage.removeItem(SS_ACTIVE); } catch {}
+  }
+  if (ui.activeId) ui.view = 'edit';
+  render();
+}
+init();
+</script>
+</body>
+</html>
